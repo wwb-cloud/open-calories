@@ -1,34 +1,68 @@
-# Gradle files
-.gradle/
-build/
+# ===================== 基础 Node.js 规则（RN核心依赖） =====================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
-# Local configuration file (sdk path, etc)
-local.properties
-
-# Log/OS Files
-*.log
-
-# Android Studio generated files and folders
-captures/
-.externalNativeBuild/
+# ===================== React Native 专属规则 =====================
+# 编译/缓存产物
+.metro-cache/
+*.hprof
 .cxx/
-*.aab
-*.apk
-output-metadata.json
+# 打包产物
+android/app/build/
+ios/build/
+dist/
+out/
+# 环境变量
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+# RN 调试相关
+*.jsbundle
+*.keystore
+!debug.keystore
 
-# IntelliJ
+# ===================== 安卓原生专属规则（适配Mac） =====================
+android/build/
+android/app/release/
+android/gradle/
+android/gradlew.bak
+android/local.properties  # Mac上的安卓SDK路径，必须忽略
+android/.idea/
+android/.gradle/
 *.iml
 .idea/
-misc.xml
-deploymentTargetDropDown.xml
-render.experimental.xml
-
-# Keystore files
+# 安卓签名文件（敏感）
 *.jks
-*.keystore
 
-# Google Services (e.g. APIs or Firebase)
-google-services.json
+# ===================== Mac 系统专属规则 =====================
+.DS_Store
+**/.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
 
-# Android Profiling
-*.hprof
+# ===================== 编辑器/IDE 规则（通用） =====================
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.idea/
+*.swp
+*.swo
