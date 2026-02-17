@@ -1,0 +1,22 @@
+{
+  "sisyphus": {
+    "model": "opencode/glm-5-free"
+  },
+  "agents": {
+    "oracle": {
+      "model": "opencode/glm-5-free"
+    },
+    "librarian": {
+      "model": "opencode/glm-5-free"
+    },
+    "explore": {
+      "model": "opencode/glm-5-free"
+    },
+    "frontend-engineer": {
+      "model": "opencode/glm-5-free"
+    }
+  },
+  "backgroundTask": {
+    "defaultModel": "opencode/glm-5-free"
+  }
+}

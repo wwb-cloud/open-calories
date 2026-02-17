@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,26 +8,37 @@ import {
   StyleSheet,
   Alert,
   RefreshControl,
+  Modal,
+  Pressable,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
+import * as ImagePicker from 'expo-image-picker';
 import Toast from 'react-native-toast-message';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { RootStackParamList } from '../../App';
 import { Meal } from '../types';
-import { getAllMeals, deleteMeal, getTodayTotalKcal } from '../db/database';
+import { getAllMeals, deleteMeal, getTodayTotalKcal, initDatabase } from '../db/database';
 
-type HistoryScreenNavigationProp = StackNavigationProp<RootStackParamList, 'History'>;
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
 interface Props {
-  navigation: HistoryScreenNavigationProp;
+  navigation: HomeScreenNavigationProp;
 }
 
 export default function HistoryScreen({ navigation }: Props) {
   const [meals, setMeals] = useState<Meal[]>([]);
   const [todayTotal, setTodayTotal] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  useEffect(() => {
+    initDatabase().catch(err => {
+      Alert.alert('数据库错误', '无法初始化数据库: ' + err.message);
+    });
+  }, []);
 
   const loadData = useCallback(async () => {
     try {
@@ -87,6 +98,46 @@ export default function HistoryScreen({ navigation }: Props) {
     );
   };
 
+  const handleTakePhoto = async () => {
+    setModalVisible(false);
+    
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('需要相机权限', '请允许应用访问相机以拍摄食物照片');
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      navigation.navigate('Result', { imageUri: result.assets[0].uri });
+    }
+  };
+
+  const handlePickImage = async () => {
+    setModalVisible(false);
+    
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('需要相册权限', '请允许应用访问相册以选择食物照片');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      navigation.navigate('Result', { imageUri: result.assets[0].uri });
+    }
+  };
+
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
     const now = new Date();
@@ -127,18 +178,12 @@ export default function HistoryScreen({ navigation }: Props) {
     <View style={styles.emptyContainer}>
       <MaterialIcons name="restaurant-menu" size={64} color="#ddd" />
       <Text style={styles.emptyText}>还没有记录</Text>
-      <Text style={styles.emptySubtext}>拍一张照片开始记录你的饮食吧</Text>
-      <TouchableOpacity 
-        style={styles.addButton}
-        onPress={() => navigation.navigate('Camera')}
-      >
-        <Text style={styles.addButtonText}>去记录</Text>
-      </TouchableOpacity>
+      <Text style={styles.emptySubtext}>点击下方按钮开始记录你的饮食吧</Text>
     </View>
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.summaryCard}>
         <View style={styles.summaryLeft}>
           <Text style={styles.summaryLabel}>今日摄入</Text>
@@ -167,7 +212,68 @@ export default function HistoryScreen({ navigation }: Props) {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
       />
-    </View>
+
+      <TouchableOpacity 
+        style={styles.addButton}
+        onPress={() => setModalVisible(true)}
+        activeOpacity={0.8}
+      >
+        <MaterialIcons name="add" size={32} color="#fff" />
+      </TouchableOpacity>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <Pressable 
+          style={styles.modalOverlay} 
+          onPress={() => setModalVisible(false)}
+        >
+          <Pressable 
+            style={styles.modalContent} 
+            onPress={() => {}}
+          >
+            <View style={styles.modalHandle} />
+            <Text style={styles.modalTitle}>添加记录</Text>
+            
+            <TouchableOpacity 
+              style={styles.modalOption}
+              onPress={handleTakePhoto}
+            >
+              <View style={styles.modalOptionIcon}>
+                <MaterialIcons name="camera-alt" size={28} color="#4CAF50" />
+              </View>
+              <View style={styles.modalOptionText}>
+                <Text style={styles.modalOptionTitle}>拍照</Text>
+                <Text style={styles.modalOptionDesc}>使用相机拍摄食物照片</Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.modalOption}
+              onPress={handlePickImage}
+            >
+              <View style={styles.modalOptionIcon}>
+                <MaterialIcons name="photo-library" size={28} color="#2196F3" />
+              </View>
+              <View style={styles.modalOptionText}>
+                <Text style={styles.modalOptionTitle}>从相册选择</Text>
+                <Text style={styles.modalOptionDesc}>从手机相册中选择照片</Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.modalCancelButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.modalCancelText}>取消</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
+    </SafeAreaView>
   );
 }
 
@@ -237,6 +343,7 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingTop: 0,
     flexGrow: 1,
+    paddingBottom: 100,
   },
   mealItem: {
     flexDirection: 'row',
@@ -305,15 +412,88 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   addButton: {
-    marginTop: 20,
-    paddingVertical: 12,
-    paddingHorizontal: 32,
+    position: 'absolute',
+    bottom: 24,
+    right: 24,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: '#4CAF50',
-    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
-  addButtonText: {
-    color: '#fff',
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    paddingTop: 12,
+  },
+  modalHandle: {
+    width: 40,
+    height: 4,
+    backgroundColor: '#ddd',
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  modalOptionIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  modalOptionText: {
+    flex: 1,
+  },
+  modalOptionTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#333',
+  },
+  modalOptionDesc: {
+    fontSize: 14,
+    color: '#999',
+    marginTop: 2,
+  },
+  modalCancelButton: {
+    marginTop: 20,
+    paddingVertical: 16,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  modalCancelText: {
     fontSize: 16,
     fontWeight: '600',
+    color: '#666',
   },
 });

@@ -96,7 +96,7 @@ export default function ResultScreen({ navigation, route }: Props) {
         text2: `${selectedFood} ${weight}g = ${calories} kcal`,
       });
 
-      navigation.navigate('Camera');
+      navigation.navigate('Home');
     } catch (error) {
       Toast.show({
         type: 'error',
