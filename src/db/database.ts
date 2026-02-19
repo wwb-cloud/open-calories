@@ -4,21 +4,44 @@ import { Meal, DailySummary } from '../types';
 const DB_NAME = 'calories.db';
 
 let db: SQLite.SQLiteDatabase | null = null;
+let initPromise: Promise<void> | null = null;
 
 export async function initDatabase(): Promise<void> {
-  db = await SQLite.openDatabaseAsync(DB_NAME);
-  
-  await db.execAsync(`
-    CREATE TABLE IF NOT EXISTS meals (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      foodLabel TEXT NOT NULL,
-      weightGram INTEGER NOT NULL,
-      cooking TEXT NOT NULL,
-      kcal INTEGER NOT NULL,
-      imageUri TEXT,
-      createdAt INTEGER NOT NULL
-    );
-  `);
+  if (db) return;
+  if (initPromise) {
+    await initPromise;
+    return;
+  }
+
+  initPromise = (async () => {
+    db = await SQLite.openDatabaseAsync(DB_NAME);
+
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS meals (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        foodLabel TEXT NOT NULL,
+        weightGram INTEGER NOT NULL,
+        cooking TEXT NOT NULL,
+        kcal INTEGER NOT NULL,
+        imageUri TEXT,
+        createdAt INTEGER NOT NULL
+      );
+    `);
+  })();
+
+  try {
+    await initPromise;
+  } finally {
+    initPromise = null;
+  }
+}
+
+async function ensureDatabase(): Promise<SQLite.SQLiteDatabase> {
+  await initDatabase();
+  if (!db) {
+    throw new Error('Database not initialized');
+  }
+  return db;
 }
 
 export async function addMeal(
@@ -28,9 +51,9 @@ export async function addMeal(
   kcal: number,
   imageUri?: string
 ): Promise<number> {
-  if (!db) throw new Error('Database not initialized');
+  const database = await ensureDatabase();
   
-  const result = await db.runAsync(
+  const result = await database.runAsync(
     'INSERT INTO meals (foodLabel, weightGram, cooking, kcal, imageUri, createdAt) VALUES (?, ?, ?, ?, ?, ?)',
     foodLabel,
     weightGram,
@@ -44,9 +67,9 @@ export async function addMeal(
 }
 
 export async function getAllMeals(): Promise<Meal[]> {
-  if (!db) throw new Error('Database not initialized');
-  
-  const rows = await db.getAllAsync<Meal>(
+  const database = await ensureDatabase();
+
+  const rows = await database.getAllAsync<Meal>(
     'SELECT * FROM meals ORDER BY createdAt DESC'
   );
   
@@ -54,12 +77,12 @@ export async function getAllMeals(): Promise<Meal[]> {
 }
 
 export async function getMealsByDate(timestamp: number): Promise<Meal[]> {
-  if (!db) throw new Error('Database not initialized');
+  const database = await ensureDatabase();
   
   const startOfDay = new Date(timestamp).setHours(0, 0, 0, 0);
   const endOfDay = new Date(timestamp).setHours(23, 59, 59, 999);
   
-  const rows = await db.getAllAsync<Meal>(
+  const rows = await database.getAllAsync<Meal>(
     'SELECT * FROM meals WHERE createdAt >= ? AND createdAt <= ? ORDER BY createdAt DESC',
     startOfDay,
     endOfDay
@@ -69,12 +92,12 @@ export async function getMealsByDate(timestamp: number): Promise<Meal[]> {
 }
 
 export async function getTodayTotalKcal(): Promise<number> {
-  if (!db) throw new Error('Database not initialized');
+  const database = await ensureDatabase();
   
   const startOfDay = new Date().setHours(0, 0, 0, 0);
   const endOfDay = new Date().setHours(23, 59, 59, 999);
   
-  const result = await db.getFirstAsync<{ total: number }>(
+  const result = await database.getFirstAsync<{ total: number }>(
     'SELECT SUM(kcal) as total FROM meals WHERE createdAt >= ? AND createdAt <= ?',
     startOfDay,
     endOfDay
@@ -84,19 +107,19 @@ export async function getTodayTotalKcal(): Promise<number> {
 }
 
 export async function deleteMeal(id: number): Promise<void> {
-  if (!db) throw new Error('Database not initialized');
-  
-  await db.runAsync('DELETE FROM meals WHERE id = ?', id);
+  const database = await ensureDatabase();
+
+  await database.runAsync('DELETE FROM meals WHERE id = ?', id);
 }
 
 export async function getDailySummaries(days: number = 7): Promise<DailySummary[]> {
-  if (!db) throw new Error('Database not initialized');
+  const database = await ensureDatabase();
   
   const endDate = new Date();
   const startDate = new Date();
   startDate.setDate(endDate.getDate() - days + 1);
   
-  const rows = await db.getAllAsync<{ date: string; totalKcal: number; mealCount: number }>(
+  const rows = await database.getAllAsync<{ date: string; totalKcal: number; mealCount: number }>(
     `SELECT 
       date(createdAt / 1000, 'unixepoch', 'localtime') as date,
       SUM(kcal) as totalKcal,

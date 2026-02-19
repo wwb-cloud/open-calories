@@ -35,8 +35,8 @@ export default function HistoryScreen({ navigation }: Props) {
   const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
-    initDatabase().catch(err => {
-      Alert.alert('数据库错误', '无法初始化数据库: ' + err.message);
+    initDatabase().catch(() => {
+      // Silent init failure; subsequent operations will retry via ensureDatabase.
     });
   }, []);
 

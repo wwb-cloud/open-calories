@@ -1,4 +1,5 @@
 import { FoodItem } from '../types';
+export type { FoodItem } from '../types';
 
 // 常见食物热量表 (kcal/100g) 和密度 (g/cm³)
 export const FOOD_DATABASE: FoodItem[] = [
