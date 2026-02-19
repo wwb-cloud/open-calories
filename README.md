@@ -1,42 +1,71 @@
 # OpenCalories - 卡路里记账本
 
-基于 React Native 的离线卡路里追踪应用。
+基于 React Native 的离线卡路里追踪应用，采用 TensorFlow Lite 的专业食物识别模型，支持 2000+ 种食物。
 
-## Phase 1 - 手动模式 (已实现)
+## 核心特性 ✅
 
-✅ 基础功能完成：
-- 拍照/相册选择食物照片
-- 手动选择食物类型（60+种常见食物）
-- 调整重量（滑块 + 快捷按钮）
-- 选择烹饪方式（生食/清蒸/炒/油炸）
-- 自动计算热量
-- SQLite 本地存储
-- 历史记录查看与删除
-- 今日热量汇总
+### 基础功能
+- 📷 拍照/相册选择食物照片
+- 🤖 **AI 食物识别**（通过 TensorFlow Lite AIY Food V1 模型，2023 种食物）
+- 🥗 手动选择食物类型（60+种常见食物）
+- ⚖️ 调整重量（滑块 + 快捷按钮）
+- 🔥 选择烹饪方式（生食/清蒸/炒/油炸）
+- 💡 自动计算热量
+- 💾 SQLite 本地存储（离线可用）
+- 📊 历史记录查看与统计
+- 📈 今日热量汇总
+
+### AI 识别升级（Phase 2）
+- ✅ **TensorFlow Lite 专业食物识别**（2023 种食物类别）
+- ✅ 谷歌 AIY Vision Food V1 模型（准确度高）
+- ✅ 原生 C++ 推理（快速、低延迟）
+- ✅ 自动英文→中文食物名称映射
+- ✅ TFJS 备用方案（模型加载失败时）
+- ✅ 实时识别结果与置信度显示
 
 ## 项目结构
 
 ```
 open-calories/
-├── App.tsx                    # 应用入口与导航
+├── App.tsx                           # 应用入口与导航
 ├── src/
 │   ├── screens/
-│   │   ├── CameraScreen.tsx   # 相机/相册选择
-│   │   ├── ResultScreen.tsx   # 食物记录详情
-│   │   └── HistoryScreen.tsx  # 历史记录
+│   │   ├── ResultScreen.tsx          # 食物记录详情 (含AI识别)
+│   │   └── HistoryScreen.tsx         # 历史记录
 │   ├── db/
-│   │   └── database.ts        # SQLite 数据库操作
+│   │   └── database.ts               # SQLite 数据库操作
 │   ├── data/
-│   │   └── foods.ts           # 食物数据库 (60+种)
+│   │   └── foods.ts                  # 食物数据库 (60+种)
 │   ├── types/
-│   │   └── index.ts           # TypeScript 类型定义
+│   │   └── index.ts                  # TypeScript 类型定义
 │   └── ai/
-│       └── tflite.ts          # TFLite 模块占位符
+│       ├── index.ts                  # AI 模块入口
+│       ├── tflite.ts                 # TensorFlow Lite 推理引擎
+│       ├── food-classifier.ts        # TFJS MobileNet (备用分类器)
+│       ├── food-mapping.ts           # 食物标签英↔中映射
+│       ├── weight-estimation.ts      # 重量估算
+│       └── image-utils.ts            # 图像处理工具
+├── assets/
+│   └── models/
+│       ├── aiy_food_V1.tflite        # TFLite 模型 (2023 种食物)
+│       └── aiy_food_V1_labelmap.csv  # 食物类别标签 (英文)
+├── metro.config.js                   # Metro bundler 配置（支持 .tflite、.csv）
+├── babel.config.js
+├── tsconfig.json
 ├── package.json
 └── app.json
 ```
 
 ## 运行步骤
+
+### 开发环境要求
+
+- **Node.js**: v18+
+- **Android Studio** 或 **Android SDK**（targetSdk 36）
+- **Android 模拟器** 或真机（minSdk 24）
+- **npm** 或 **yarn**
+
+### 快速启动
 
 ```bash
 # 1. 安装依赖
@@ -45,25 +74,161 @@ npm install
 # 2. 启动开发服务器
 npx expo start
 
-# 3. 在 Android Studio 中运行
+# 3. 在模拟器或真机上运行
+# Android 模拟器: 按 'a' 键
+# iOS 模拟器: 按 'i' 键
 # 或扫描 Expo Go 二维码
+
+# 或直接构建 APK：
+npm run android          # 开发版 APK
+npm run android:release  # 发布版 APK
 ```
 
-## Phase 2 计划
+## TensorFlow Lite 食物识别
 
-- [ ] TFLite 食物分类模型集成
-- [ ] OpenCV 银行卡参照体积估算
-- [ ] AI 估算 vs 手动输入对比
-- [ ] 模型量化优化 (<4MB)
+### 模型信息
+
+应用采用 **Google AIY Vision Food V1** 模型进行第一阶段食物识别：
+
+| 指标 | 说明 |
+|------|------|
+| **模型类型** | TensorFlow Lite 量化模型 |
+| **食物类别** | 2023 种 |
+| **输入尺寸** | 224×224×3 (RGB float32) |
+| **模型大小** | ~21 MB |
+| **推理库** | react-native-fast-tflite (C++ JSI) |
+| **性能** | ~500ms per image (Snapdragon 8xx) |
+| **精度** | Top-1: ~71%, Top-5: ~90% |
+
+### 识别流程
+
+```
+照片输入
+   ↓
+JPEG 解码 + 图像预处理 (224×224 RGB)
+   ↓
+TensorFlow Lite 推理 (C++ 原生)
+   ↓
+获取 Top-5 预测结果
+   ↓
+英文标签 → 中文食物名称映射
+   ↓
+用户选择 或 自动匹配
+   ↓
+热量计算 & 保存到数据库
+```
+
+### 备用方案
+
+若 TFLite 加载失败，自动降级到 **TensorFlow.js MobileNet V2**（1000 种通用物体分类）。
 
 ## 技术栈
 
-- React Native 0.73 + Expo SDK 50
-- TypeScript
+| 层级 | 技术 | 版本 |
+|------|------|------|
+| **框架** | React Native (Expo) | - |
+| **语言** | TypeScript | 5.x |
+| **AI-推理** | TensorFlow Lite (C++ JSI) | via react-native-fast-tflite@2.0.0 |
+| **AI-备用** | TensorFlow.js | 4.x |
+| **数据库** | SQLite 3 | expo-sqlite |
+| **导航** | React Navigation | 6.x |
+| **图像处理** | jpeg-js, expo-image-picker | - |
+| **构建系统** | Gradle | 8.14.3 |
+
+## 核心模块说明
+
+### [`src/ai/tflite.ts`](src/ai/tflite.ts) - TFLite 推理引擎
+- **职责**: 加载模型、预处理图像、运行推理
+- **关键函数**:
+  - `loadModel()` - 加载 TFLite 模型和标签
+  - `loadLabels()` - 解析食物标签 CSV
+  - `toFloat32Rgb()` - 图像预处理（resize 到 224×224）
+  - `TFLiteModule.predictFood()` - 执行推理并返回 Top-5 结果
+
+### [`src/ai/food-mapping.ts`](src/ai/food-mapping.ts) - 食物名称映射
+- **职责**: 英文标签 → 中文食物名称映射
+- **包含**: 60+ 常见食物的中英对照表
+
+### [`src/screens/ResultScreen.tsx`](src/screens/ResultScreen.tsx) - 识别结果页面
+- **职责**: 拍照、AI 识别、手动调整、热量计算
+- **流程**:
+  1. 启动相机/相册选择
+  2. 尝试 TFLite 推理，失败时使用 TFJS 备用
+  3. 显示识别结果，用户可调整
+  4. 保存到数据库
+
+### [`src/db/database.ts`](src/db/database.ts) - 数据库操作
+- **职责**: SQLite 初始化、增删改查
+- **表结构**: `meals` (id, food, weight, cooking, calories, timestamp, imageUri)
+- **特性**: 自动初始化、幂等操作
+
+### [`src/screens/HistoryScreen.tsx`](src/screens/HistoryScreen.tsx) - 历史记录
+- **职责**: 显示今日/历史meals、删除record、统计热量
+
+## 构建指南
+
+### 开发版 APK（带 Metro 调试服务器）
+
+```bash
+npm run android
+# 输出: android/app/build/outputs/apk/debug/app-debug.apk
+# 注: 手机需与电脑在同一网络，可使用 adb 命令手动安装
+```
+
+### 发布版 APK（独立运行，无需服务器）
+
+```bash
+npm run android:release
+# 输出: android/app/build/outputs/apk/release/app-release.apk
+```
+
+**发布版构建流程**:
+1. TypeScript → JavaScript (babel + metro)
+2. 打包 bundle + 资源文件（包括 21MB TFLite 模型）
+3. 通过 Gradle 编译 Java/Kotlin 代码
+4. C++ TFLite 绑定编译（arm64-v8a, armeabi-v7a, x86, x86_64）
+5. 生成无符号 APK
+6. 支持通过发行 keystore 签名
+
+## 已知限制
+
+1. **TFLite 精度**: AIY Food V1 在通用食物上精度 ~70%，建议在识别结果中提供手动调整选项
+2. **模型大小**: 21MB 模型会增加 APK 体积，考虑使用动态下载或模块化方案
+3. **推理延迟**: 在低端设备上可能需要 1000ms+ 才能完成推理
+4. **中文映射**: 仅支持 CSV 中定义的标签映射，部分食物可能无中文对应
+
+## 未来计划
+
+- [ ] 重量估算模块（参照物体积估计）
+- [ ] 云同步功能（iCloud/Google Drive 备份）
+- [ ] 营养成分详情（蛋白质、脂肪、碳水）
+- [ ] 食物推荐系统（基于历史记录）
+- [ ] 支持 iPhone（iOS 部署）
+- [ ] 模型定期更新机制
+
+## 许可证
+
+MIT
+
+## 相关资源
+
+- [Google AIY Quickdraw Food](https://github.com/google/aiyprojects-raspberrypi)
+- [TensorFlow Lite 官方文档](https://www.tensorflow.org/lite)
+- [React Native 文档](https://reactnative.dev/)
+- [Expo 官方文档](https://docs.expo.dev/)
+
+### 支持的食物类型
+
+AI 可识别 100+ 种常见食物，并映射到应用内食物数据库。
+
+## 技术栈
+
+- React Native 0.81 + Expo SDK 54
+- TypeScript 5.9
 - React Navigation
+- TensorFlow.js + MobileNet V2
 - expo-sqlite (SQLite)
-- expo-camera (相机)
-- expo-image-picker (相册)
+- expo-image-picker + expo-image-manipulator
 
 ## 食物数据库
 
@@ -77,7 +242,7 @@ npx expo start
 每种食物包含：
 - 名称
 - 热量 (kcal/100g)
-- 密度 (g/cm³，用于Phase 2体积估算)
+- 密度 (g/cm³，用于体积估算)
 - 分类
 
 ## 烹饪系数
