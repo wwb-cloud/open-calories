@@ -4,16 +4,12 @@
  * Re-exports all AI-related functionality for the OpenCalories app.
  */
 
-// Main classifier
+// Cloud classifier
 export {
-  initClassifier,
-  isClassifierReady,
-  isTensorFlowAvailable,
-  classifyFood,
-  getTopFoodPrediction,
-  disposeClassifier,
-  type PredictionResult,
-} from './food-classifier';
+  classifyFoodWithCloud,
+  isCloudClassifierConfigured,
+  type CloudPredictResult,
+} from './cloud-classifier';
 
 // Image utilities
 export {

@@ -1,10 +1,9 @@
 /**
- * Image Processing Utilities for TensorFlow.js in React Native
+ * Image Processing Utilities in React Native
  * 
- * Handles image loading, resizing, and conversion to tensors.
+ * Handles image loading and resizing.
  */
 
-import * as tf from '@tensorflow/tfjs';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 
 export interface ProcessedImage {
@@ -56,6 +55,10 @@ export async function getImageDimensions(uri: string): Promise<{ width: number; 
 /**
  * Clean up tensor memory
  */
-export function disposeTensors(tensors: tf.Tensor[]): void {
+export interface DisposableTensor {
+  dispose: () => void;
+}
+
+export function disposeTensors(tensors: DisposableTensor[]): void {
   tensors.forEach(t => t.dispose());
 }

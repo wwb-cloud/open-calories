@@ -16,7 +16,6 @@ import Toast from 'react-native-toast-message';
 
 import { RootStackParamList } from '../../App';
 import '../ai/polyfills';
-import { getTopFoodPrediction } from '../ai';
 import { TFLiteModule } from '../ai/tflite';
 import { COOKING_OPTIONS } from '../types';
 import { addMeal, initDatabase } from '../db/database';
@@ -53,37 +52,40 @@ export default function ResultScreen({ route, navigation }: Props) {
     const runClassification = async () => {
       try {
         setIsClassifying(true);
-        setPredictionHint('');
+        setPredictionHint('正在加载本地模型...');
+
         let tfliteResult: { label: string; confidence: number; matchedFoodName?: string } | null = null;
+        let errorMsg = '';
         try {
+          console.log('[TFLite] 开始识别, imageUri:', imageUri);
           tfliteResult = await TFLiteModule.predictFood(imageUri);
+          console.log('[TFLite] 识别结果:', JSON.stringify(tfliteResult));
         } catch (error) {
+          errorMsg = error instanceof Error ? error.message : String(error);
+          console.error('[TFLite] 识别出错:', errorMsg);
           tfliteResult = null;
         }
 
-        const result = tfliteResult
-          ? {
-              label: tfliteResult.label,
-              confidence: tfliteResult.confidence,
-              matchedFood: tfliteResult.matchedFoodName
-                ? { name: tfliteResult.matchedFoodName }
-                : undefined,
-            }
-          : await getTopFoodPrediction(imageUri);
         if (cancelled) return;
 
-        if (result?.matchedFood?.name) {
-          setFoodName(result.matchedFood.name);
-          setQuery(result.matchedFood.name);
-          setPredictionHint(`已识别: ${result.label} (${Math.round(result.confidence * 100)}%)`);
-        } else if (result?.label) {
-          setPredictionHint(`识别到: ${result.label} (${Math.round(result.confidence * 100)}%)，请手动选择`);
+        if (tfliteResult?.matchedFoodName) {
+          setFoodName(tfliteResult.matchedFoodName);
+          setQuery(tfliteResult.matchedFoodName);
+          setPredictionHint(
+            `本地识别：已识别 ${tfliteResult.label} (${Math.round(tfliteResult.confidence * 100)}%)`
+          );
+        } else if (tfliteResult?.label) {
+          setPredictionHint(
+            `本地识别：识别到 ${tfliteResult.label} (${Math.round(tfliteResult.confidence * 100)}%)，请手动选择`
+          );
         } else {
-          setPredictionHint('未识别到食物，请手动选择');
+          setPredictionHint(errorMsg ? `识别失败: ${errorMsg}` : '未识别到食物，请手动选择');
         }
       } catch (error) {
         if (!cancelled) {
-          setPredictionHint('识别失败，请手动选择');
+          const msg = error instanceof Error ? error.message : String(error);
+          console.error('[TFLite] 顶层错误:', msg);
+          setPredictionHint(`识别失败: ${msg}`);
         }
       } finally {
         if (!cancelled) {
