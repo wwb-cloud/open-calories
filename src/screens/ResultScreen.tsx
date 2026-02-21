@@ -128,7 +128,7 @@ export default function ResultScreen({ route, navigation }: Props) {
       setSaving(true);
       await addMeal(foodName.trim(), Math.round(weight), cooking, kcal, imageUri);
       Toast.show({ type: 'success', text1: '保存成功' });
-      navigation.navigate('Home');
+      navigation.navigate('Main');
     } catch (error) {
       Toast.show({
         type: 'error',

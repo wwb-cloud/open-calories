@@ -21,16 +21,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../../App';
 import { Meal } from '../types';
 import { getAllMeals, deleteMeal, getTodayTotalKcal, initDatabase } from '../db/database';
+import { getProfile, calculateBMR } from '../utils/userProfile';
 
-type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
 interface Props {
-  navigation: HomeScreenNavigationProp;
+  navigation: any;
 }
 
 export default function HistoryScreen({ navigation }: Props) {
   const [meals, setMeals] = useState<Meal[]>([]);
   const [todayTotal, setTodayTotal] = useState(0);
+  const [bmr, setBmr] = useState<number | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -42,12 +44,18 @@ export default function HistoryScreen({ navigation }: Props) {
 
   const loadData = useCallback(async () => {
     try {
-      const [allMeals, total] = await Promise.all([
+      const [allMeals, total, profile] = await Promise.all([
         getAllMeals(),
         getTodayTotalKcal(),
+        getProfile(),
       ]);
       setMeals(allMeals);
       setTodayTotal(total);
+      if (profile) {
+        setBmr(calculateBMR(profile));
+      } else {
+        setBmr(null);
+      }
     } catch (error) {
       Toast.show({
         type: 'error',
@@ -185,13 +193,14 @@ export default function HistoryScreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.summaryCard}>
-        <View style={styles.summaryLeft}>
-          <Text style={styles.summaryLabel}>今日摄入</Text>
-          <View style={styles.caloriesRow}>
-            <Text style={styles.summaryValue}>{todayTotal}</Text>
-            <Text style={styles.summaryUnit}>kcal</Text>
+          <View style={styles.summaryLeft}>
+            <Text style={styles.summaryLabel}>今日摄入</Text>
+            <View style={styles.caloriesRow}>
+              <Text style={styles.summaryValue}>{todayTotal}</Text>
+              {bmr !== null && <Text style={styles.summaryTarget}> / {bmr}</Text>}
+              <Text style={styles.summaryUnit}>kcal</Text>
+            </View>
           </View>
-        </View>
         <View style={styles.summaryRight}>
           <MaterialIcons name="local-fire-department" size={40} color="#FF9800" />
         </View>
@@ -308,6 +317,11 @@ const styles = StyleSheet.create({
     fontSize: 36,
     fontWeight: 'bold',
     color: '#FF5722',
+  },
+  summaryTarget: {
+    fontSize: 24,
+    color: '#999',
+    marginLeft: 4,
   },
   summaryUnit: {
     fontSize: 16,

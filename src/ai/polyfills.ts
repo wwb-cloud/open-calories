@@ -11,11 +11,4 @@ if (typeof global.Buffer === 'undefined') {
   global.Buffer = require('buffer').Buffer;
 }
 
-// Polyfill for fetch if needed
-// @ts-ignore
-if (typeof global.fetch === 'undefined') {
-  // @ts-ignore
-  global.fetch = require('node-fetch');
-}
-
 export {};
