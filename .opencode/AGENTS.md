@@ -69,7 +69,6 @@ open-calories/
 | react-native-expo | RN/Expo 开发指南 | 组件开发、导航、性能优化 |
 | sqlite | 数据库操作 | CRUD、迁移、查询优化 |
 | typescript | 类型安全 | 类型定义、泛型、类型守卫 |
-| mobile-testing | 移动端测试 | Jest、RNTL、Maestro、E2E |
 
 ## 常用命令
 

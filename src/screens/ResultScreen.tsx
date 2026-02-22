@@ -47,6 +47,11 @@ export default function ResultScreen({ route, navigation }: Props) {
   }, []);
 
   useEffect(() => {
+    if (!imageUri) {
+      setPredictionHint('请手动输入或选择食物');
+      return;
+    }
+
     let cancelled = false;
 
     const runClassification = async () => {
@@ -126,7 +131,7 @@ export default function ResultScreen({ route, navigation }: Props) {
 
     try {
       setSaving(true);
-      await addMeal(foodName.trim(), Math.round(weight), cooking, kcal, imageUri);
+      await addMeal(foodName.trim(), Math.round(weight), cooking, kcal, imageUri || '');
       Toast.show({ type: 'success', text1: '保存成功' });
       navigation.navigate('Main');
     } catch (error) {
@@ -150,14 +155,15 @@ export default function ResultScreen({ route, navigation }: Props) {
         keyExtractor={item => item.name}
         ListHeaderComponent={
           <View>
-            <Image source={{ uri: imageUri }} style={styles.image} />
+            {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
 
-            <Text style={styles.sectionTitle}>识别结果（可修改）</Text>
+            <Text style={styles.sectionTitle}>{imageUri ? '识别结果（可修改）' : '手动记录'}</Text>
             <TextInput
               value={query}
               onChangeText={setQuery}
               placeholder="搜索食物名称"
               style={styles.searchInput}
+              autoFocus={!imageUri}
             />
 
             <Text style={styles.selectedLabel}>当前食物：{foodName || '待识别/请选择'}</Text>

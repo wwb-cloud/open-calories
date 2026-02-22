@@ -1,18 +1,22 @@
 import 'react-native-gesture-handler';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialIcons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import ResultScreen from './src/screens/ResultScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
 import StatusScreen from './src/screens/StatusScreen';
+import OnboardingScreen from './src/screens/OnboardingScreen';
 
 export type RootStackParamList = {
   Main: undefined;
-  Result: { imageUri: string };
+  Result: { imageUri?: string };
+  Onboarding: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -54,9 +58,45 @@ function MainTabs() {
 }
 
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [initialRoute, setInitialRoute] = useState<keyof RootStackParamList>('Onboarding');
+
+  useEffect(() => {
+    async function checkOnboarding() {
+      try {
+        const value = await AsyncStorage.getItem('is_onboarded');
+        if (value === 'true') {
+          setInitialRoute('Main');
+        } else {
+          setInitialRoute('Onboarding');
+        }
+      } catch (e) {
+        // Default to onboarding on error
+        setInitialRoute('Onboarding');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    checkOnboarding();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#FF5722" />
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer>
-      <Stack.Navigator id="RootStack" initialRouteName="Main">
+      <Stack.Navigator id="RootStack" initialRouteName={initialRoute}>
+        <Stack.Screen 
+          name="Onboarding" 
+          component={OnboardingScreen} 
+          options={{ headerShown: false }}
+        />
         <Stack.Screen 
           name="Main" 
           component={MainTabs}
@@ -72,3 +112,4 @@ export default function App() {
     </NavigationContainer>
   );
 }
+

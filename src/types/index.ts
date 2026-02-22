@@ -35,3 +35,5 @@ export interface DailySummary {
   totalKcal: number;
   mealCount: number;
 }
+
+

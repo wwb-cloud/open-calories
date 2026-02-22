@@ -1,81 +1,35 @@
 # OpenCalories - 卡路里记账本
 
-基于 React Native 的**离线**卡路里追踪应用，拍照即可识别食物并计算热量。
+## App 介绍
 
-## 功能
+OpenCalories 是一款离线卡路里记录 App。你可以通过拍照或从相册选择食物图片，自动识别食物并计算热量，适合日常饮食记录。
 
-- 📷 拍照 / 相册选择食物照片
-- 🤖 AI 食物识别（TFLite 本地推理，2024 种食物，无需联网）
-- 🥗 100+ 种中文食物数据库
-- ⚖️ 自定义重量 + 烹饪方式
-- 🔥 自动计算热量
-- 📊 历史记录与每日统计
+主要功能：
+- 拍照 / 相册识别食物
+- 自动计算热量并记录
+- 支持手动调整食物、重量和烹饪方式
+- 查看每日摄入和历史记录
 
-## 安装到手机
+## 下载与使用教程
 
-### 方式一：直接安装 APK（推荐）
+### 1) 下载 APK
 
-1. 从 [Releases](https://github.com/your-repo/open-calories/releases) 下载最新 `app-release.apk`
-2. 传输到手机（微信/QQ/数据线均可）
-3. 在手机上打开 APK 文件
-4. 如提示"未知来源"，按提示允许安装
-5. 安装完成后打开"OpenCalories"即可使用
+从项目 Releases 页面下载最新 `app-release.apk`：
+- https://github.com/wwb-cloud/open-calories/releases
 
-### 方式二：通过数据线安装（需电脑）
+### 2) 安装到手机
 
-**前提**：手机开启 USB 调试（设置 → 开发者选项 → USB 调试）
+1. 把 `app-release.apk` 传到手机（微信/QQ/数据线都可以）
+2. 在手机里打开 APK 文件开始安装
+3. 如果提示“未知来源”或“安全提醒”，按系统提示允许安装
+4. 安装完成后打开 `OpenCalories`
 
-```bash
-# 1. 连接手机到电脑
-# 2. 安装（手机上弹窗点"允许"）
-adb install -r app-release.apk
-```
+> vivo 手机如安装被拦截，请在“设置 → 安全与隐私 → 更多安全设置”中开启“通过 USB 安装应用”。
 
-> 💡 **vivo 手机**：还需开启"通过USB安装应用"（设置 → 安全与隐私 → 更多安全设置）
+### 3) 使用步骤
 
-### 方式三：从源码构建
-
-```bash
-# 环境要求：Node.js 18+、JDK 17、Android SDK
-
-npm install
-npx expo prebuild --platform android
-cd android
-.\gradlew.bat assembleRelease   # Windows
-# ./gradlew assembleRelease     # Mac/Linux
-
-# APK 输出：android/app/build/outputs/apk/release/app-release.apk
-```
-
-## 使用指南
-
-1. 打开应用，点击 **"📷 拍照记录"** 或 **"🖼️ 从相册选择"**
-2. 等待 AI 识别（约 1 秒），自动匹配食物
-3. 如识别不准确，可手动搜索选择食物
-4. 调整重量（默认 100g）和烹饪方式
-5. 点击 **保存**，热量自动计算并记录
-6. 在首页查看今日摄入总热量和历史记录
-
-## 技术栈
-
-- React Native 0.81 + Expo SDK 54 + TypeScript
-- TensorFlow Lite（Google AIY Food V1 模型，192×192 uint8 输入）
-- react-native-fast-tflite（C++ JSI 原生推理）
-- expo-sqlite（本地数据库）
-- jpeg-js（纯 JS 图像解码）
-
-## 项目结构
-
-```
-src/
-├── screens/          # 页面（ResultScreen 识别页、HistoryScreen 历史页）
-├── ai/               # AI 模块（tflite.ts 推理、food-mapping.ts 中英映射）
-├── db/               # 数据库（SQLite CRUD）
-├── data/             # 食物数据库（100+ 种食物热量数据）
-└── types/            # TypeScript 类型
-assets/models/        # TFLite 模型 + 标签文件
-```
-
-## 许可证
-
-MIT
+1. 打开 App，点击“拍照记录”或“从相册选择”
+2. 等待识别结果
+3. 确认或手动调整食物、重量、烹饪方式
+4. 点击保存
+5. 在首页查看今日热量和历史记录

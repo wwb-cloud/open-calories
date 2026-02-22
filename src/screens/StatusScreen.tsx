@@ -12,7 +12,15 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { UserProfile, Gender, saveProfile, getProfile, calculateBMR } from '../utils/userProfile';
+import { 
+  UserProfile, 
+  Gender, 
+  saveProfile, 
+  getProfile, 
+  calculateBMR, 
+  calculateTargetKcal, 
+  ACTIVITY_LEVELS 
+} from '../utils/userProfile';
 import Toast from 'react-native-toast-message';
 
 export default function StatusScreen() {
@@ -20,7 +28,10 @@ export default function StatusScreen() {
   const [weight, setWeight] = useState('');
   const [height, setHeight] = useState('');
   const [gender, setGender] = useState<Gender>('male');
+  // Default to sedentary if we don't ask
+  const activityLevel = 1.2;
   const [bmr, setBmr] = useState<number | null>(null);
+  const [targetKcal, setTargetKcal] = useState<number | null>(null);
 
   useEffect(() => {
     loadProfile();
@@ -33,9 +44,13 @@ export default function StatusScreen() {
       setWeight(profile.weight.toString());
       setHeight(profile.height.toString());
       setGender(profile.gender);
-      setBmr(calculateBMR(profile));
+      
+      const bmrVal = calculateBMR(profile);
+      setBmr(bmrVal);
+      setTargetKcal(calculateTargetKcal(profile));
     }
   };
+
 
   const handleSave = async () => {
     if (!age || !weight || !height) {
@@ -58,21 +73,33 @@ export default function StatusScreen() {
       return;
     }
 
-    const profile: UserProfile = {
+    // Temporary object to calculate target
+    const tempProfile = {
       age: ageNum,
       weight: weightNum,
       height: heightNum,
       gender,
+      activityLevel,
+      targetKcal: 0
+    };
+    
+    const newTargetKcal = calculateTargetKcal(tempProfile);
+
+    const profile: UserProfile = {
+      ...tempProfile,
+      targetKcal: newTargetKcal
     };
 
     try {
       await saveProfile(profile);
       const newBmr = calculateBMR(profile);
       setBmr(newBmr);
+      setTargetKcal(newTargetKcal);
+      
       Toast.show({
         type: 'success',
         text1: '保存成功',
-        text2: `您的基础代谢为 ${newBmr} kcal`,
+        text2: `每日目标热量: ${newTargetKcal} kcal`,
       });
     } catch (error) {
       Toast.show({
@@ -166,13 +193,17 @@ export default function StatusScreen() {
 
           {bmr !== null && (
             <View style={styles.resultCard}>
-              <Text style={styles.resultLabel}>基础代谢 (BMR)</Text>
-              <View style={styles.bmrContainer}>
-                <Text style={styles.bmrValue}>{bmr}</Text>
-                <Text style={styles.bmrUnit}>kcal/天</Text>
+              <View style={styles.resultRow}>
+                <View style={styles.resultItem}>
+                  <Text style={styles.resultLabel}>基础代谢 (BMR)</Text>
+                  <View style={styles.bmrContainer}>
+                    <Text style={styles.bmrValue}>{bmr}</Text>
+                    <Text style={styles.bmrUnit}>kcal</Text>
+                  </View>
+                </View>
               </View>
               <Text style={styles.bmrDesc}>
-                这是您维持基本生命活动所需的最低热量。
+                根据您的身体数据计算得出。
               </Text>
             </View>
           )}
@@ -252,6 +283,30 @@ const styles = StyleSheet.create({
   genderTextSelected: {
     color: '#fff',
   },
+  activityContainer: {
+    marginTop: 4,
+  },
+  activityOption: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#eee',
+    borderRadius: 8,
+    marginBottom: 6,
+    backgroundColor: '#f9f9f9',
+  },
+  activityOptionSelected: {
+    borderColor: '#FF5722',
+    backgroundColor: '#FFF5F2',
+  },
+  activityText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+  },
+  activityTextSelected: {
+    color: '#FF5722',
+    fontWeight: '600',
+  },
   saveButton: {
     backgroundColor: '#4CAF50',
     borderRadius: 12,
@@ -269,37 +324,50 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 16,
     padding: 20,
-    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
   },
+  resultRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  resultItem: {
+    alignItems: 'center',
+  },
+  separator: {
+    width: 1,
+    backgroundColor: '#eee',
+    marginHorizontal: 10,
+  },
   resultLabel: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#666',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   bmrContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    marginBottom: 8,
   },
   bmrValue: {
-    fontSize: 36,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#FF5722',
   },
   bmrUnit: {
-    fontSize: 16,
+    fontSize: 12,
     color: '#FF5722',
-    marginLeft: 4,
-    marginBottom: 6,
+    marginLeft: 2,
+    marginBottom: 4,
   },
   bmrDesc: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#999',
     textAlign: 'center',
+    marginTop: 8,
   },
 });
+

@@ -146,6 +146,11 @@ export default function HistoryScreen({ navigation }: Props) {
     }
   };
 
+  const handleManualInput = () => {
+    setModalVisible(false);
+    navigation.navigate('Result', { imageUri: undefined });
+  };
+
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
     const now = new Date();
@@ -247,6 +252,19 @@ export default function HistoryScreen({ navigation }: Props) {
             <View style={styles.modalHandle} />
             <Text style={styles.modalTitle}>添加记录</Text>
             
+            <TouchableOpacity 
+              style={styles.modalOption}
+              onPress={handleManualInput}
+            >
+              <View style={styles.modalOptionIcon}>
+                <MaterialIcons name="edit" size={28} color="#FF9800" />
+              </View>
+              <View style={styles.modalOptionText}>
+                <Text style={styles.modalOptionTitle}>手动记录</Text>
+                <Text style={styles.modalOptionDesc}>直接输入食物名称和重量</Text>
+              </View>
+            </TouchableOpacity>
+
             <TouchableOpacity 
               style={styles.modalOption}
               onPress={handleTakePhoto}

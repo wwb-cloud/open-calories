@@ -7,7 +7,17 @@ export interface UserProfile {
   weight: number; // kg
   height: number; // cm
   gender: Gender;
+  activityLevel: number; // 1.2 to 1.9
+  targetKcal: number;
 }
+
+export const ACTIVITY_LEVELS = [
+  { label: '久坐不动', value: 1.2 },
+  { label: '轻度活动', value: 1.375 },
+  { label: '中度活动', value: 1.55 },
+  { label: '高度活动', value: 1.725 },
+  { label: '非常活跃', value: 1.9 },
+];
 
 const PROFILE_KEY = 'user_profile';
 
@@ -30,7 +40,7 @@ export const getProfile = async (): Promise<UserProfile | null> => {
   }
 };
 
-export const calculateBMR = (profile: UserProfile): number => {
+export const calculateBMR = (profile: Pick<UserProfile, 'age' | 'weight' | 'height' | 'gender'>): number => {
   const { age, weight, height, gender } = profile;
   // Mifflin-St Jeor Equation
   let bmr = (10 * weight) + (6.25 * height) - (5 * age);
@@ -43,3 +53,9 @@ export const calculateBMR = (profile: UserProfile): number => {
   
   return Math.round(bmr);
 };
+
+export const calculateTargetKcal = (profile: UserProfile): number => {
+  const bmr = calculateBMR(profile);
+  return Math.round(bmr * profile.activityLevel);
+};
+
