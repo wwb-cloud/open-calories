@@ -31,7 +31,8 @@
           "photosPermission": "Allow $(PRODUCT_NAME) to access your photos to select food images."
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      "react-native-fast-tflite"
     ]
   }
 }

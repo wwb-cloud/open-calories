@@ -103,7 +103,7 @@ async function loadModel(): Promise<TensorflowModel> {
   }
 }
 
-function toFloat32Rgb(decoded: jpeg.BufferRet, targetSize: number): Float32Array {
+function toFloat32Rgb(decoded: any, targetSize: number): Float32Array {
   const { width, height, data } = decoded;
   if (width !== targetSize || height !== targetSize) {
     throw new Error('Unexpected image size after resize');
@@ -120,7 +120,7 @@ function toFloat32Rgb(decoded: jpeg.BufferRet, targetSize: number): Float32Array
 }
 
 // AIY Food V1 is a quantized model expecting Uint8 (0-255) input
-function toUint8Rgb(decoded: jpeg.BufferRet, targetSize: number): Uint8Array {
+function toUint8Rgb(decoded: any, targetSize: number): Uint8Array {
   const { width, height, data } = decoded;
   if (width !== targetSize || height !== targetSize) {
     throw new Error('Unexpected image size after resize');
@@ -212,7 +212,7 @@ export const TFLiteModule = {
     // Prepare input based on model's expected data type
     let input: Uint8Array | Float32Array;
     let usedType: string;
-    if (inputType === 'uint8' || inputType === 'UINT8') {
+    if (inputType === 'uint8' || (inputType as string) === 'UINT8') {
       input = toUint8Rgb(decoded, targetSize);
       usedType = 'uint8';
     } else {

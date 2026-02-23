@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert, Platform } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert, Platform, KeyboardAvoidingView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { UserProfile, ACTIVITY_LEVELS, saveProfile, calculateTargetKcal } from '../utils/userProfile';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -69,6 +70,11 @@ export default function OnboardingScreen() {
   };
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+    >
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>欢迎使用 Open Calories</Text>
       <Text style={styles.subtitle}>为了更准确地为您计算热量需求，请填写以下基本信息</Text>
@@ -128,6 +134,8 @@ export default function OnboardingScreen() {
         <Text style={styles.buttonText}>开始使用</Text>
       </TouchableOpacity>
     </ScrollView>
+    </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 

@@ -33,3 +33,31 @@ OpenCalories 是一款离线卡路里记录 App。你可以通过拍照或从相
 3. 确认或手动调整食物、重量、烹饪方式
 4. 点击保存
 5. 在首页查看今日热量和历史记录
+
+## 开发者指南 (Developer Guide)
+
+### iOS 开发环境配置
+
+本项目基于 React Native / Expo 开发，iOS 端需要 macOS 环境。
+
+#### 环境要求
+- macOS (推荐最新版本)
+- Xcode (App Store 下载)
+- CocoaPods (`sudo gem install cocoapods`)
+- Node.js
+
+#### 运行步骤
+
+1. **安装依赖**
+   ```bash
+   npm install
+   cd ios && pod install && cd ..
+   ```
+
+2. **启动 iOS 模拟器**
+   ```bash
+   npx expo run:ios
+   ```
+
+3. **真机调试**
+   如需在真机运行，请使用 Xcode 打开 `ios/OpenCalories.xcworkspace`，配置 Signing & Capabilities 中的 Team ID，然后连接手机运行。

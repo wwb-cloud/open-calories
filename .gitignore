@@ -67,3 +67,6 @@ Icon
 *.swp
 *.swo
 nul
+
+# Expo
+.expo/

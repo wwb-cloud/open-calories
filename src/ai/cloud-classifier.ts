@@ -57,7 +57,7 @@ export async function classifyFoodWithCloud(imageUri: string): Promise<CloudPred
   }
 
   const base64Image = await FileSystem.readAsStringAsync(imageUri, {
-    encoding: FileSystem.EncodingType.Base64,
+    encoding: 'base64',
   });
 
   const prompt = [

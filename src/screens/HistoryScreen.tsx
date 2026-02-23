@@ -16,7 +16,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import Toast from 'react-native-toast-message';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { RootStackParamList } from '../../App';
 import { Meal } from '../types';
@@ -35,6 +35,7 @@ export default function HistoryScreen({ navigation }: Props) {
   const [bmr, setBmr] = useState<number | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     initDatabase().catch(() => {
@@ -246,7 +247,7 @@ export default function HistoryScreen({ navigation }: Props) {
           onPress={() => setModalVisible(false)}
         >
           <Pressable 
-            style={styles.modalContent} 
+            style={[styles.modalContent, { paddingBottom: Math.max(40, insets.bottom + 20) }]} 
             onPress={() => {}}
           >
             <View style={styles.modalHandle} />
