@@ -1,18 +1,19 @@
-  {
-    "images": [
-    {"idiom": "universal", "size": "20x20", "scale": "1x", "filename": "AppIcon-20x1.png" },\n  {"idiom": "universal", "size": "20x20", "scale": "2x", "filename": "AppIcon-20x2.png" },\n  {"idiom": "universal", "size": "20x20", "scale": "3x", "filename": "AppIcon-20x3.png" },\n  {"idiom": "universal", "size": "29x29", "scale": "1x", "filename": "AppIcon-29x1.png" },\n  {"idiom": "universal", "size": "29x29", "scale": "2x", "filename": "AppIcon-29x2.png" },\n  {"idiom": "universal", "size": "29x29", "scale": "3x", "filename": "AppIcon-29x3.png" },\n  {"idiom": "universal", "size": "40x40", "scale": "1x", "filename": "AppIcon-40x1.png" },\n  {"idiom": "universal", "size": "40x40", "scale": "2x", "filename": "AppIcon-40x2.png" },\n  {"idiom": "universal", "size": "40x40", "scale": "3x", "filename": "AppIcon-40x3.png" },\n  {"idiom": "universal", "size": "60x60", "scale": "2x", "filename": "AppIcon-60x2.png" },\n  {"idiom": "universal", "size": "60x60", "scale": "3x", "filename": "AppIcon-60x3.png" },\n  {"idiom": "universal", "size": "76x76", "scale": "1x", "filename": "AppIcon-76x1.png" },\n  {"idiom": "universal", "size": "83.5x83.5", "scale": "2x", "filename": "AppIcon-83.5x2.png" },\n  {"idiom": "universal", "size": "83.5x83.5", "scale": "2x", "filename": "AppIcon-83.5x2.png" },\n  {"idiom": "universal", "size": "1024x1024", "scale": "1x", "filename": "AppIcon-1024x1.png" },\n
-    ],
-    "info": {
-      "version": 1,
-      "author": "xcode"
-    }
+{
+  "images": [
+        { "idiom": "universal", "size": "20x20", "scale": "2x", "filename": "AppIcon-20x2.png" },
+        { "idiom": "universal", "size": "20x20", "scale": "3x", "filename": "AppIcon-20x3.png" },
+        { "idiom": "universal", "size": "29x29", "scale": "2x", "filename": "AppIcon-29x2.png" },
+        { "idiom": "universal", "size": "29x29", "scale": "3x", "filename": "AppIcon-29x3.png" },
+        { "idiom": "universal", "size": "40x40", "scale": "2x", "filename": "AppIcon-40x2.png" },
+        { "idiom": "universal", "size": "40x40", "scale": "3x", "filename": "AppIcon-40x3.png" },
+        { "idiom": "universal", "size": "60x60", "scale": "2x", "filename": "AppIcon-60x2.png" },
+        { "idiom": "universal", "size": "60x60", "scale": "3x", "filename": "AppIcon-60x3.png" },
+        { "idiom": "universal", "size": "76x76", "scale": "2x", "filename": "AppIcon-76x2.png" },
+        { "idiom": "universal", "size": "83.5x83.5", "scale": "2x", "filename": "AppIcon-83.5x2.png" },
+        { "idiom": "universal", "size": "1024x1024", "scale": "1x", "filename": "AppIcon-1024x1.png" }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
   }
-  JSON
-
-  echo "iOS AppIcon set generated at assets/icons/ios/AppIcon.appiconset"
-
-  echo "Done. To use these, copy Android mipmap files into android/app/src/main/res and iOS AppIcon set into ios/OpenCalories/Images.xcassets/AppIcon.appiconset"
-echo "iOS AppIcon set generated at assets/icons/ios/AppIcon.appiconset"
-
-echo "Done. To use these, copy Android mipmap files into android/app/src/main/res and iOS AppIcon set into ios/OpenCalories/Images.xcassets/AppIcon.appiconset"
-echo "Done. To use these, copy Android mipmap files into android/app/src/main/res and iOS AppIcon set into ios/OpenCalories/Images.xcassets/AppIcon.appiconset"
+}

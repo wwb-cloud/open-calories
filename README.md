@@ -22,7 +22,7 @@ OpenCalories 是一款离线卡路里记录 App。你可以通过拍照或从相
 由于 iOS 系统限制，暂无法直接安装。您可以选择以下方式：
 
 #### 方式 A：自签名安装 (推荐极客用户)
-1. 从 Releases 页面下载最新 `.ipa` 文件（需自行寻找签名工具）
+1. 访问 [Releases 页面](https://github.com/wwb-cloud/open-calories/releases) 下载最新 `.ipa` 文件（需自行寻找签名工具）
 2. 使用 [AltStore](https://altstore.io/) 或 [Sideloadly](https://sideloadly.io/) 安装到手机
 3. 在“设置 → 通用 → VPN与设备管理”中信任开发者证书
 *注意：个人免费证书有效期仅 7 天，需定期刷新*
