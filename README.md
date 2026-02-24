@@ -13,10 +13,8 @@ OpenCalories 是一款离线卡路里记录 App。你可以通过拍照或从相
 ## 下载与安装 (Download & Install)
 
 ### Android 用户
-1. 访问 [Releases 页面](https://github.com/wwb-cloud/open-calories/releases) 下载最新 `app-release.apk`
+1. 访问 [Releases 页面](https://github.com/wwb-cloud/open-calories/releases) 下载最新 `.apk`文件
 2. 直接安装即可（部分手机需允许“安装未知来源应用”）
-
-> vivo 手机如安装被拦截，请在“设置 → 安全与隐私 → 更多安全设置”中开启“通过 USB 安装应用”。
 
 ### iOS 用户
 由于 iOS 系统限制，暂无法直接安装。您可以选择以下方式：
@@ -41,30 +39,3 @@ OpenCalories 是一款离线卡路里记录 App。你可以通过拍照或从相
 4. 点击保存
 5. 在首页查看今日热量和历史记录
 
-## 开发者指南 (Developer Guide)
-
-### iOS 开发环境配置
-
-本项目基于 React Native / Expo 开发，iOS 端需要 macOS 环境。
-
-#### 环境要求
-- macOS (推荐最新版本)
-- Xcode (App Store 下载)
-- CocoaPods (`sudo gem install cocoapods`)
-- Node.js
-
-#### 运行步骤
-
-1. **安装依赖**
-   ```bash
-   npm install
-   cd ios && pod install && cd ..
-   ```
-
-2. **启动 iOS 模拟器**
-   ```bash
-   npx expo run:ios
-   ```
-
-3. **真机调试**
-   如需在真机运行，请使用 Xcode 打开 `ios/OpenCalories.xcworkspace`，配置 Signing & Capabilities 中的 Team ID，然后连接手机运行。
